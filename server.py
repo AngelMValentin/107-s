@@ -4,9 +4,16 @@ from config import db
 
 app = Flask(__name__)
 
+
+
 @app.get("/")
 def home():
     return "Hello from Flask"
+
+@app.get("/hello")
+def hello():
+    message = {'message': 'Hello there!'}
+    return  json.dumps(message)
 
 @app.get("/test")
 def test():
@@ -36,7 +43,25 @@ def save_product():
     print(f"this is my new product {product}")
     # products.append(product)
     db.products.insert_one(product)
+    product = fix_id(product)
     return json.dumps(product)
+
+@app.get("/api/coupons")
+def get_coupons():
+    coupons = []
+    cursor = db.coupons.find({})
+    for coupon in cursor:
+        coupons.append(fix_id(coupon))
+    return json.dumps(coupons)
+
+@app.post("/api/coupons")
+def save_coupon():
+    coupon = request.get_json()
+    print(f"this is my new coupon {coupon}")
+    # products.append(product)
+    db.coupons.insert_one(coupon)
+    coupon = fix_id(coupon)
+    return json.dumps(coupon)
 
 @app.put("/api/products/<int:index>")
 def update_product(index):
@@ -48,6 +73,8 @@ def update_product(index):
         return json.dumps(updated_product)
     else:
         return "That index does not exist"
+    
+products = []
     
 def fix_id(obj):
     obj["_id"] = str(obj["_id"])
