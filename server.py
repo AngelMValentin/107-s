@@ -1,9 +1,10 @@
 from flask import Flask, request
 import json
 from config import db
+from flask_cors import CORS
 
 app = Flask(__name__)
-
+CORS(app)
 
 
 @app.get("/")
@@ -45,6 +46,19 @@ def save_product():
     db.products.insert_one(product)
     product = fix_id(product)
     return json.dumps(product)
+
+
+@app.get('/api/categories')
+def get_categories():
+    results = []
+    cursor = db.products.find({})
+    for prod in cursor:
+        category = prod['category']
+        if category not in results:
+            results.append(category)
+
+    return json.dumps(results)
+
 
 @app.get("/api/coupons")
 def get_coupons():
